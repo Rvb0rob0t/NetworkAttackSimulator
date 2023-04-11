@@ -25,7 +25,7 @@ class BestDQN(DQNAgent):
                 eval_epsilon=self.eval_epsilon
             )
             if eval_ret > self.best_score:
-                print(f"Saving New Best Score = {ep_ret}")
+                print(f"Saving New Best Score = {eval_ret}")
                 self.best_score = eval_ret
                 self.save(self.save_path)
 

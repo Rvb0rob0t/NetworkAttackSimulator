@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     env = nasim.make_benchmark(
         args.env_name,
-        fully_obs=True,
+        fully_obs=False,
         flat_actions=True,
         flat_obs=True,
         render_mode="human"

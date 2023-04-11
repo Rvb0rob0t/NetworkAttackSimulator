@@ -695,9 +695,9 @@ class FlatActionSpace(spaces.Discrete):
         Action
             Corresponding Action object
         """
-        assert isinstance(action_idx, int), \
-            ("When using flat action space, action must be an integer"
-             f" or an Action object: {action_idx} is invalid")
+        assert isinstance(action_idx, int) or action_idx.dtype == np.int, (
+            "action_idx must be an int, not {}".format(type(action_idx))
+        )
         return self.actions[action_idx]
 
 
