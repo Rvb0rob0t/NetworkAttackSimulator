@@ -221,8 +221,8 @@ class Scenario:
         return len(self.hosts) * actions_per_host
 
     def get_state_space_size(self):
-        # compromised, reachable, discovered
-        host_aux_bin_features = 3
+        # compromised, reachable, [os_|services_|processes_]discovered
+        host_aux_bin_features = 6
         num_bin_features = (
             host_aux_bin_features
             + self.num_os
@@ -235,8 +235,9 @@ class Scenario:
         return len(self.hosts) * host_states
 
     def get_state_dims(self):
-        # compromised, reachable, discovered, value, discovery_value, access
-        host_aux_features = 6
+        # compromised, reachable, [os_|services_|processes_]discovered,
+        # value, discovery_value, access
+        host_aux_features = 9
         host_state_size = (
             self.address_space_bounds[0]
             + self.address_space_bounds[1]

@@ -13,7 +13,8 @@ class NASimGymEnv(NASimEnv):
                  fully_obs=False,
                  flat_actions=True,
                  flat_obs=True,
-                 render_mode=None):
+                 render_mode=None,
+                 seed=None):
         """
         Parameters
         ----------
@@ -33,7 +34,7 @@ class NASimGymEnv(NASimEnv):
             The render mode to use for the environment.
         """
         if not isinstance(scenario, Scenario):
-            scenario = make_benchmark_scenario(scenario)
+            scenario = make_benchmark_scenario(scenario, seed)
         super().__init__(scenario,
                          fully_obs=fully_obs,
                          flat_actions=flat_actions,

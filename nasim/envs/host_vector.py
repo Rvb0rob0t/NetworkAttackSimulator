@@ -26,20 +26,24 @@ class HostVector:
     3. compromised - bool
     4. reachable - bool
     5. discovered - bool
-    6. value - float
-    7. discovery value - float
-    8. access - int
-    9. OS - bool for each OS in scenario (only one OS has value of true)
-    10. services running - bool for each service in scenario
-    11. processes running - bool for each process in scenario
+    6. os_discovered - bool
+    7. services_discovered - bool
+    8. processes_discovered - bool
+    9. value - float
+    10. discovery value - float
+    11. access - int
+    12. OS - bool for each OS in scenario (only one OS has value of true)
+    13. services running - bool for each service in scenario
+    14. processes running - bool for each process in scenario
 
     Notes
     -----
     - The size of the vector is equal to:
 
-        #subnets + max #hosts in any subnet + 6 + #OS + #services + #processes.
+        #subnets + max #hosts in any subnet + 9 + #OS + #services + #processes.
 
-    - Where the +6 is for compromised, reachable, discovered, value,
+    - Where the +6 is for compromised, reachable,
+      [os_|services_|processes_]discovered, value,
       discovery_value, and access features
     - The vector is a float vector so True/False is actually represented as
       1.0/0.0.
@@ -72,6 +76,9 @@ class HostVector:
     _compromised_idx = None
     _reachable_idx = None
     _discovered_idx = None
+    _os_discovered_idx = None
+    _services_discovered_idx = None
+    _processes_discovered_idx = None
     _value_idx = None
     _discovery_value_idx = None
     _access_idx = None
@@ -99,6 +106,9 @@ class HostVector:
         vector[cls._compromised_idx] = int(host.compromised)
         vector[cls._reachable_idx] = int(host.reachable)
         vector[cls._discovered_idx] = int(host.discovered)
+        vector[cls._os_discovered_idx] = int(host.os_discovered)
+        vector[cls._services_discovered_idx] = int(host.services_discovered)
+        vector[cls._processes_discovered_idx] = int(host.processes_discovered)
         vector[cls._value_idx] = host.value
         vector[cls._discovery_value_idx] = host.discovery_value
         vector[cls._access_idx] = host.access
@@ -137,6 +147,14 @@ class HostVector:
         self.vector[self._compromised_idx] = int(val)
 
     @property
+    def reachable(self):
+        return self.vector[self._reachable_idx]
+
+    @reachable.setter
+    def reachable(self, val):
+        self.vector[self._reachable_idx] = int(val)
+
+    @property
     def discovered(self):
         return self.vector[self._discovered_idx]
 
@@ -145,12 +163,28 @@ class HostVector:
         self.vector[self._discovered_idx] = int(val)
 
     @property
-    def reachable(self):
-        return self.vector[self._reachable_idx]
+    def os_discovered(self):
+        return self.vector[self._os_discovered_idx]
 
-    @reachable.setter
-    def reachable(self, val):
-        self.vector[self._reachable_idx] = int(val)
+    @os_discovered.setter
+    def os_discovered(self, val):
+        self.vector[self._os_discovered_idx] = int(val)
+
+    @property
+    def services_discovered(self):
+        return self.vector[self._services_discovered_idx]
+
+    @services_discovered.setter
+    def services_discovered(self, val):
+        self.vector[self._services_discovered_idx] = int(val)
+
+    @property
+    def processes_discovered(self):
+        return self.vector[self._processes_discovered_idx]
+
+    @processes_discovered.setter
+    def processes_discovered(self, val):
+        self.vector[self._processes_discovered_idx] = int(val)
 
     @property
     def address(self):
@@ -226,10 +260,13 @@ class HostVector:
         next_state = self.copy()
         if action.is_service_scan():
             result = ActionResult(True, 0, services=self.services)
+            next_state.services_discovered = True
             return next_state, result
 
         if action.is_os_scan():
-            return next_state, ActionResult(True, 0, os=self.os)
+            result = ActionResult(True, 0, os=self.os)
+            next_state.os_discovered = True
+            return next_state, result
 
         if action.is_exploit():
             if self.is_running_service(action.service) and \
@@ -262,6 +299,7 @@ class HostVector:
             result = ActionResult(
                 True, 0, access=self.access, processes=self.processes
             )
+            next_state.processes_discovered = True
             return next_state, result
 
         if action.is_privilege_escalation():
@@ -299,6 +337,9 @@ class HostVector:
                 compromised=False,
                 reachable=False,
                 discovered=False,
+                os_discovered=False,
+                services_discovered=False,
+                processes_discovered=False,
                 access=False,
                 value=False,
                 discovery_value=False,
@@ -317,6 +358,16 @@ class HostVector:
             obs[self._reachable_idx] = self.vector[self._reachable_idx]
         if discovered:
             obs[self._discovered_idx] = self.vector[self._discovered_idx]
+        if os_discovered:
+            obs[self._os_discovered_idx] = self.vector[self._os_discovered_idx]
+        if services_discovered:
+            obs[self._services_discovered_idx] = self.vector[
+                self._services_discovered_idx
+            ]
+        if processes_discovered:
+            obs[self._processes_discovered_idx] = self.vector[
+                self._processes_discovered_idx
+            ]
         if value:
             obs[self._value_idx] = self.vector[self._value_idx]
         if discovery_value:
@@ -371,7 +422,10 @@ class HostVector:
         )
         cls._reachable_idx = cls._compromised_idx + 1
         cls._discovered_idx = cls._reachable_idx + 1
-        cls._value_idx = cls._discovered_idx + 1
+        cls._os_discovered_idx = cls._discovered_idx + 1
+        cls._services_discovered_idx = cls._os_discovered_idx + 1
+        cls._processes_discovered_idx = cls._services_discovered_idx + 1
+        cls._value_idx = cls._processes_discovered_idx + 1
         cls._discovery_value_idx = cls._value_idx + 1
         cls._access_idx = cls._discovery_value_idx + 1
         cls._os_start_idx = cls._access_idx + 1
@@ -419,6 +473,9 @@ class HostVector:
         readable_dict["Compromised"] = bool(hvec.compromised)
         readable_dict["Reachable"] = bool(hvec.reachable)
         readable_dict["Discovered"] = bool(hvec.discovered)
+        readable_dict["OS Discovered"] = bool(hvec.os_discovered)
+        readable_dict["Services Discovered"] = bool(hvec.services_discovered)
+        readable_dict["Processes Discovered"] = bool(hvec.processes_discovered)
         readable_dict["Value"] = hvec.value
         readable_dict["Discovery Value"] = hvec.discovery_value
         readable_dict["Access"] = hvec.access

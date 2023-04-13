@@ -18,6 +18,9 @@ class Host:
                  compromised=False,
                  reachable=False,
                  discovered=False,
+                 os_discovered=False,
+                 services_discovered=False,
+                 processes_discovered=False,
                  access=0):
         """
         Arguments
@@ -47,6 +50,15 @@ class Host:
         discovered : bool, optional
             whether host has been reachable discovered by attacker or not
             (default=False)
+        os_discovered : bool, optional
+            whether host's OS has been discovered by attacker or not
+            (default=False)
+        services_discovered : bool, optional
+            whether host's services have been discovered by attacker or not
+            (default=False)
+        processes_discovered : bool, optional
+            whether host's processes have been discovered by attacker or not
+            (default=False)
         access : int, optional
             access level of attacker on host (default=0)
         """
@@ -60,6 +72,9 @@ class Host:
         self.compromised = compromised
         self.reachable = reachable
         self.discovered = discovered
+        self.os_discovered = os_discovered
+        self.services_discovered = services_discovered
+        self.processes_discovered = processes_discovered
         self.access = access
 
     def is_running_service(self, service):
@@ -79,6 +94,10 @@ class Host:
         output.append(f"\taddress: {self.address}")
         output.append(f"\tcompromised: {self.compromised}")
         output.append(f"\treachable: {self.reachable}")
+        output.append(f"\tdiscovered: {self.discovered}")
+        output.append(f"\tos_discovered: {self.os_discovered}")
+        output.append(f"\tservices_discovered: {self.services_discovered}")
+        output.append(f"\tprocesses_discovered: {self.processes_discovered}")
         output.append(f"\tvalue: {self.value}")
         output.append(f"\taccess: {self.access}")
 

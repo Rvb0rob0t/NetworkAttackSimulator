@@ -156,6 +156,9 @@ class State:
             compromised=False,
             reachable=True,     # must be true for success
             discovered=True,    # must be true for success
+            os_discovered=True, # must be true for success
+            services_discovered=True, # must be true for success
+            processes_discovered=True, # must be true for success
             value=False,
             # discovery_value=False,    # this is only added as needed
             services=False,
@@ -235,6 +238,15 @@ class State:
     def host_discovered(self, host_addr):
         return self.get_host(host_addr).discovered
 
+    def host_os_discovered(self, host_addr):
+        return self.get_host(host_addr).os_discovered
+
+    def host_services_discovered(self, host_addr):
+        return self.get_host(host_addr).services_discovered
+
+    def host_processes_discovered(self, host_addr):
+        return self.get_host(host_addr).processes_discovered
+
     def host_has_access(self, host_addr, access_level):
         return self.get_host(host_addr).access >= access_level
 
@@ -246,6 +258,15 @@ class State:
 
     def set_host_discovered(self, host_addr):
         self.get_host(host_addr).discovered = True
+
+    def set_host_os_discovered(self, host_addr):
+        self.get_host(host_addr).os_discovered = True
+
+    def set_host_services_discovered(self, host_addr):
+        self.get_host(host_addr).services_discovered = True
+
+    def set_host_processes_discovered(self, host_addr):
+        self.get_host(host_addr).processes_discovered = True
 
     def get_host_value(self, host_address):
         return self.hosts[host_address].get_value()

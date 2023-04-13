@@ -31,6 +31,9 @@ class Network:
             host.access = AccessLevel.NONE
             host.reachable = self.subnet_public(host_addr[0])
             host.discovered = host.reachable
+            host.os_discovered = False
+            host.services_discovered = False
+            host.processes_discovered = False
         return next_state
 
     def perform_action(self, state, action):
@@ -61,6 +64,10 @@ class Network:
 
         if not state.host_reachable(action.target) \
            or not state.host_discovered(action.target):
+            result = ActionResult(False, 0.0, connection_error=True)
+            return next_state, result
+
+        if not self._check_previous_scan(state, action):
             result = ActionResult(False, 0.0, connection_error=True)
             return next_state, result
 
@@ -95,6 +102,19 @@ class Network:
         next_state.update_host(action.target, next_host_state)
         self._update(next_state, action, action_obs)
         return next_state, action_obs
+
+    def _check_previous_scan(self, state, action):
+        """Check if a previous scan has been performed on the target host.
+        """
+        if action.is_exploit():
+            scanned = state.host_services_discovered(action.target)
+        elif action.is_privilege_escalation():
+            scanned =  state.host_processes_discovered(action.target)
+        else:
+            return True
+        if action.os is not None:
+            scanned = scanned and state.host_os_discovered(action.target)
+        return scanned
 
     def _perform_subnet_scan(self, next_state, action):
         if not next_state.host_compromised(action.target):
