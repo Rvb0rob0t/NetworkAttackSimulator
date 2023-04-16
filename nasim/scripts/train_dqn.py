@@ -1,7 +1,9 @@
 """A script for training a DQN agent and storing best policy """
 
+import gymnasium
 import nasim
 from nasim.agents.dqn_agent import DQNAgent
+from nasim.envs.gym_env import NASimGymEnv
 
 
 class BestDQN(DQNAgent):
@@ -46,7 +48,7 @@ if __name__ == "__main__":
                         help="(default=[64. 64])")
     parser.add_argument("--lr", type=float, default=0.001,
                         help="Learning rate (default=0.001)")
-    parser.add_argument("--training_steps", type=int, default=10000,
+    parser.add_argument("-t", "--training_steps", type=int, default=10000,
                         help="training steps (default=10000)")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="(default=32)")
@@ -65,11 +67,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     assert args.training_steps > args.exploration_steps
 
-    env = nasim.make_benchmark(args.env_name,
-                               args.seed,
-                               fully_obs=not args.partially_obs,
-                               flat_actions=True,
-                               flat_obs=True)
+    # env = nasim.make_benchmark(args.env_name,
+    #                            args.seed,
+    #                            fully_obs=not args.partially_obs,
+    #                            flat_actions=True,
+    #                            flat_obs=True)
+    env = NASimGymEnv(
+        args.env_name,
+        fully_obs=not args.partially_obs,
+        flat_actions=True,
+        flat_obs=True,
+        seed=args.seed
+    )
     dqn_agent = BestDQN(env, **vars(args))
     dqn_agent.train()
 
