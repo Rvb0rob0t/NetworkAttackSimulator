@@ -202,11 +202,21 @@ class State:
         obs.update_from_host(t_idx, target_obs)
         return obs
 
+    def shape_useful_flat(self):
+        return self.useful_numpy_flat().shape
+
     def shape_flat(self):
         return self.numpy_flat().shape
 
     def shape(self):
         return self.tensor.shape
+
+    def useful_numpy_flat(self):
+        # build array with gym_observation() for each host
+        # then flatten
+        return np.concatenate(
+            [host.useful_numpy() for _, host in self.hosts]
+        ).flatten()
 
     def numpy_flat(self):
         return self.tensor.flatten()

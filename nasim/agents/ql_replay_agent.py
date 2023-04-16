@@ -32,6 +32,7 @@ from pprint import pprint
 import numpy as np
 
 import nasim
+from nasim.envs.gym_env import NASimGymEnv
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -85,9 +86,11 @@ class TabularQFunction:
         return self.forward(x)
 
     def forward(self, x):
+        print(x)
         if isinstance(x, np.ndarray):
             x = str(x.astype(np.int))
         if x not in self.q_func:
+            print(x)
             self.q_func[x] = np.zeros(self.num_actions, dtype=np.float32)
         return self.q_func[x]
 
@@ -229,6 +232,7 @@ class TabularQLearningAgent:
                       f"{self.training_steps}")
                 print(f"\treturn = {ep_return}")
                 print(f"\tgoal = {goal}")
+                print(self.qfunc.q_func)
 
         self.logger.close()
         if self.verbose:
@@ -239,7 +243,7 @@ class TabularQLearningAgent:
             print(f"\tgoal = {goal}")
 
     def run_train_episode(self, step_limit):
-        o = self.env.reset()
+        o, _ = self.env.reset()
         done = False
         env_step_limit_reached = False
 
@@ -271,7 +275,7 @@ class TabularQLearningAgent:
                          render_mode="readable"):
         if env is None:
             env = self.env
-        o = env.reset()
+        o, _ = env.reset()
         done = False
         env_step_limit_reached = False
 
@@ -283,7 +287,7 @@ class TabularQLearningAgent:
             print("\n" + line_break)
             print(f"Running EVALUATION using epsilon = {eval_epsilon:.4f}")
             print(line_break)
-            env.render(render_mode)
+            env.render()
             input("Initial state. Press enter to continue..")
 
         while not done and not env_step_limit_reached:
@@ -297,7 +301,7 @@ class TabularQLearningAgent:
                 print(f"Step {steps}")
                 print(line_break)
                 print(f"Action Performed = {env.action_space.get_action(a)}")
-                env.render(render_mode)
+                env.render()
                 print(f"Reward = {r}")
                 print(f"Done = {done}")
                 print(f"Step limit reached = {env_step_limit_reached}")
@@ -342,11 +346,18 @@ if __name__ == "__main__":
                         help="Run in Quite mode")
     args = parser.parse_args()
 
-    env = nasim.make_benchmark(args.env_name,
-                               args.seed,
-                               fully_obs=True,
-                               flat_actions=True,
-                               flat_obs=True)
+    # env = nasim.make_benchmark(args.env_name,
+    #                            args.seed,
+    #                            fully_obs=True,
+    #                            flat_actions=True,
+    #                            flat_obs=True)
+    env = NASimGymEnv(
+        args.env_name,
+        fully_obs=True,
+        flat_actions=True,
+        flat_obs=True,
+        seed=args.seed
+    )
     ql_agent = TabularQLearningAgent(
         env, verbose=args.quite, **vars(args)
     )

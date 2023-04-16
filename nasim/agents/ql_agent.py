@@ -30,6 +30,7 @@ import numpy as np
 from pprint import pprint
 
 import nasim
+from nasim.envs.gym_env import NASimGymEnv
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -188,6 +189,11 @@ class TabularQLearningAgent:
                       f"{self.training_steps}")
                 print(f"\treturn = {ep_return}")
                 print(f"\tgoal = {goal}")
+                print(f"\tNumber of diff states visited = {len(self.qfunc.q_func)}")
+                print(
+                    "Max Q values = "
+                    f"{np.max(list(self.qfunc.q_func.values()), axis=0)}"
+                )
 
         self.logger.close()
         if self.verbose:
@@ -303,12 +309,17 @@ if __name__ == "__main__":
                         help="Run in Quite mode")
     args = parser.parse_args()
 
-    env = nasim.make_benchmark(
+    # env = nasim.make_benchmark(args.env_name,
+    #                            args.seed,
+    #                            fully_obs=True,
+    #                            flat_actions=True,
+    #                            flat_obs=True)
+    env = NASimGymEnv(
         args.env_name,
-        args.seed,
         fully_obs=True,
         flat_actions=True,
-        flat_obs=True
+        flat_obs=True,
+        seed=args.seed
     )
     ql_agent = TabularQLearningAgent(
         env, verbose=args.quite, **vars(args)

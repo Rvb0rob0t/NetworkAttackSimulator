@@ -86,6 +86,8 @@ class HostVector:
     _service_start_idx = None
     _process_start_idx = None
 
+    _useful_idxs = None
+
     def __init__(self, vector):
         self.vector = vector
 
@@ -396,6 +398,9 @@ class HostVector:
     def numpy(self):
         return self.vector
 
+    def useful_numpy(self):
+        return self.vector[self._useful_idxs]
+
     @classmethod
     def _initialize(cls, address_space_bounds, services, os_info, processes):
         cls.os_idx_map = {}
@@ -432,6 +437,22 @@ class HostVector:
         cls._service_start_idx = cls._os_start_idx + cls.num_os
         cls._process_start_idx = cls._service_start_idx + cls.num_services
         cls.state_size = cls._process_start_idx + cls.num_processes
+
+        # NOTE useful_idxs is used to get a numpy array of only the useful
+        # information in the vector. This is used for the agent's
+        # observation space.
+        # This is comprised of compromised, reachable, discovered
+        # and its variants, and the access level.
+        cls._useful_idxs = np.array([
+            cls._compromised_idx,
+            cls._reachable_idx,
+            cls._discovered_idx,
+            cls._os_discovered_idx,
+            cls._services_discovered_idx,
+            cls._processes_discovered_idx,
+            cls._access_idx,
+        ])
+
 
     @classmethod
     def _subnet_address_idx_slice(cls):
